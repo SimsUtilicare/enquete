@@ -35,37 +35,79 @@
 </head>
 <body>
     <div class="header">
-        <h1>Welcome! Please Complete Our Survey</h1>
+        <h1>Bienvenue ! Please Complete Our Survey</h1>
     </div>
     <div class="form-container">
         <!-- Replace YOUR_FORM_URL with your actual Google Form or Typeform URL -->
-        <iframe id="formIframe" src="https://forms.gle/Ekxeak8ufbgTCUDf7"></iframe>
+        <iframe id="formIframe" src="https://forms.gle/gCaBFysA14xhyrMh7"></iframe>
     </div>
 
     <script>
-        // Function to check if form is submitted
-        function checkFormSubmission() {
-            try {
-                const iframe = document.getElementById('formIframe');
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                
-                // Check for Google Forms submission page
-                if (iframeDoc.URL.includes('formResponse') || 
-                    // Check for Typeform thank you page
-                    iframeDoc.URL.includes('submitted')) {
-                    
-                    // Wait 3 seconds before refreshing to show the thank you message
-                    setTimeout(() => {
-                        iframe.src = iframe.src;
-                    }, 3000);
-                }
-            } catch (e) {
-                // Handle cross-origin frame access errors silently
+        // Debug mode - set to true to see console logs
+        const DEBUG = true;
+        
+        function log(message) {
+            if (DEBUG) {
+                console.log(`[Form Debug] ${message}`);
             }
         }
 
-        // Check every second for form submission
+        function checkFormSubmission() {
+            const iframe = document.getElementById('formIframe');
+            
+            try {
+                const iframeContent = iframe.contentWindow || iframe.contentDocument;
+                const currentUrl = iframeContent.location.href;
+                log(`Current iframe URL: ${currentUrl}`);
+                
+                // Google Forms submission detection
+                if (currentUrl.includes('formResponse') || 
+                    currentUrl.includes('closedform') || 
+                    currentUrl.includes('submitPage')) {
+                    log('Google Forms submission detected');
+                    handleFormSubmission();
+                }
+                
+                // Typeform submission detection
+                if (currentUrl.includes('submitted') || 
+                    currentUrl.includes('thankyou') || 
+                    currentUrl.includes('done')) {
+                    log('Typeform submission detected');
+                    handleFormSubmission();
+                }
+                
+            } catch (e) {
+                // Handle cross-origin frame access errors
+                log(`Error checking form: ${e.message}`);
+                
+                // Alternative detection method
+                if (iframe.contentDocument && 
+                    iframe.contentDocument.body && 
+                    iframe.contentDocument.body.innerText.includes('Thank you')) {
+                    log('Submission detected via content check');
+                    handleFormSubmission();
+                }
+            }
+        }
+
+        function handleFormSubmission() {
+            log('Processing form submission');
+            // Wait 3 seconds before refreshing
+            setTimeout(() => {
+                const iframe = document.getElementById('formIframe');
+                log('Refreshing form');
+                iframe.src = iframe.src;
+            }, 3000);
+        }
+
+        // Check every second
         setInterval(checkFormSubmission, 1000);
+        
+        // Also check when iframe loads
+        document.getElementById('formIframe').onload = function() {
+            log('Iframe loaded, checking for submission');
+            checkFormSubmission();
+        };
     </script>
 </body>
 </html>
