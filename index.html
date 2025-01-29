@@ -29,12 +29,19 @@
         #startButton:hover {
             background-color: #0056b3;
         }
+        #successMessage {
+            display: none;
+            color: green;
+            font-size: 20px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
     <h2>Merci de remplir notre questionnaire</h2>
     <button id="startButton" onclick="openForm()">Remplir le formulaire</button>
+    <p id="successMessage">Merci ! Le formulaire a été soumis. Un nouveau formulaire va s'ouvrir.</p>
 
     <script>
         let formWindow;
@@ -45,17 +52,28 @@
             // Ouvre le formulaire dans un nouvel onglet
             formWindow = window.open(formUrl, "_blank", "width=800,height=600");
 
-            // Vérifie toutes les 2 secondes si l'utilisateur a soumis le formulaire
+            // Vérifie toutes les 2 secondes si le formulaire est soumis
             let checkForm = setInterval(function() {
                 if (formWindow && !formWindow.closed) {
                     try {
                         let currentUrl = formWindow.location.href;
                         console.log("URL actuelle:", currentUrl);
 
-                        // Vérifie si l'URL contient "formResponse" (qui apparaît après soumission)
+                        // Détection soumission formulaire (formResponse)
                         if (currentUrl.includes("formResponse")) {
-                            console.log("Formulaire soumis, fermeture de l'onglet...");
-                            formWindow.close(); // Ferme l'onglet automatiquement
+                            console.log("Formulaire soumis !");
+                            
+                            // Affiche un message dans l'onglet principal
+                            document.getElementById("successMessage").style.display = "block";
+
+                            // Ferme l'onglet de Google Forms
+                            formWindow.close();
+
+                            // Attendre 2 secondes et rouvrir un formulaire vide
+                            setTimeout(() => {
+                                openForm();
+                            }, 2000);
+
                             clearInterval(checkForm);
                         }
                     } catch (error) {
