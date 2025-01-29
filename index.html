@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire Client</title>
+    <title>Mode Kiosque - Formulaire Client</title>
     <style>
         body {
             text-align: center;
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        h2 {
-            color: #333;
-        }
-        button {
+        #startButton {
             padding: 15px 20px;
             font-size: 18px;
             background-color: #007bff;
@@ -23,21 +25,48 @@
             border: none;
             cursor: pointer;
             border-radius: 5px;
-            margin-top: 20px;
         }
-        button:hover {
+        #startButton:hover {
             background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h2>Merci de répondre à notre questionnaire</h2>
-    <button onclick="openForm()">Remplir le Formulaire</button>
+
+    <h2>Merci de remplir notre questionnaire</h2>
+    <button id="startButton" onclick="openForm()">Remplir le formulaire</button>
 
     <script>
+        let formWindow;
+
         function openForm() {
-            window.open("https://docs.google.com/forms/d/e/1FAIpQLSft_T6DZv675g_k4e6VOLF4HjItm-Hbq_E_EXx9btXWWUcP_w/viewform?usp=sharing", "_blank"); // Remplace "YOUR_FORM_URL" par l'URL de ton Google Form
+            let formUrl = "https://docs.google.com/forms/d/e/1FAIpQLSft_T6DZv675g_k4e6VOLF4HjItm-Hbq_E_EXx9btXWWUcP_w/viewform?usp=sharing"; // Remplace par ton Google Form
+
+            // Ouvre le formulaire dans un nouvel onglet
+            formWindow = window.open(formUrl, "_blank", "width=800,height=600");
+
+            // Vérifie toutes les 2 secondes si l'utilisateur a soumis le formulaire
+            let checkForm = setInterval(function() {
+                if (formWindow && !formWindow.closed) {
+                    try {
+                        let currentUrl = formWindow.location.href;
+                        console.log("URL actuelle:", currentUrl);
+
+                        // Vérifie si l'URL contient "formResponse" (qui apparaît après soumission)
+                        if (currentUrl.includes("formResponse")) {
+                            console.log("Formulaire soumis, fermeture de l'onglet...");
+                            formWindow.close(); // Ferme l'onglet automatiquement
+                            clearInterval(checkForm);
+                        }
+                    } catch (error) {
+                        console.log("Erreur de détection (normal si Google bloque l'accès cross-origin)", error);
+                    }
+                } else {
+                    clearInterval(checkForm);
+                }
+            }, 2000);
         }
     </script>
+
 </body>
 </html>
